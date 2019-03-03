@@ -11,12 +11,12 @@ import glob
 class Model(nn.Module):
     def __init__(self, out_len=3):
         super(Model, self).__init__()
-        self.encoder = nn.LSTM(input_size=1, hidden_size=50, num_layers=3, )
+        self.encoder = nn.LSTM(input_size=1, hidden_size=100, num_layers=8, )
         # self.decoder = nn.ModuleList()
         # self.decoder.append(nn.LSTMCell(input_size=50, hidden_size=50))
         # self.decoder.append(nn.LSTMCell(input_size=50, hidden_size=50))
-        self.decoder = nn.LSTMCell(input_size=50, hidden_size=50)
-        self.linear = nn.Linear(50, 1)
+        self.decoder = nn.LSTMCell(input_size=100, hidden_size=100)
+        self.linear = nn.Linear(100, 1)
         self.out_len = out_len
 
     def forward(self, inputs):
@@ -87,7 +87,7 @@ class MyDadaSet(Dataset):
 def train(gpu_id=0):
     device = torch.device(f'cuda:{gpu_id}')
     print(device)
-    epochs = 100
+    epochs = 1000
     batch_size = 4096
 
     dataset = MyDadaSet()
@@ -99,7 +99,7 @@ def train(gpu_id=0):
 
     criteria = nn.MSELoss()
 
-    opt = optim.RMSprop(net.parameters(), lr=1e-3, weight_decay=1e-5, )
+    opt = optim.Adam(net.parameters(), lr=5e-4, weight_decay=1e-5, )
     lr_scheduler = optim.lr_scheduler.CosineAnnealingLR(opt, epochs, eta_min=1e-5)
 
     for epoch in range(epochs):
@@ -125,6 +125,7 @@ def train(gpu_id=0):
 
 def infer(gpu_id=0):
     device = torch.device(f'cuda:{gpu_id}')
+    print(device)
     data_root = 'data/round1/'
     sv_path = 'weights/submit_hihi'
     os.makedirs(sv_path, exist_ok=True)
@@ -160,4 +161,4 @@ def infer(gpu_id=0):
 if __name__ == '__main__':
     os.environ['CUDA_VISIBLE_DEVICES'] = '0'
     train()
-    # infer()
+    infer()
